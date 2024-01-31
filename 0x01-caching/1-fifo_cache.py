@@ -14,14 +14,14 @@ class FIFOCache(BaseCaching):
     def put(self, key, item):
         """Add an item to the cache"""
         if key is not None and item is not None:
-            if len(self.cache_data) > BaseCaching.MAX_ITEMS:
-                first_item, _ = next(iter(self.cache_data.items()))
+            if len(self.cache_data) >= BaseCaching.MAX_ITEMS:
+                first_item = next(iter(self.cache_data))
                 del self.cache_data[first_item]
                 print(f"DISCARD: {first_item}")
             self.cache_data[key] = item
 
     def get(self, key):
         """Retrieve an item from the cache."""
-        if key is not None or key in self.cache_data:
+        if key is not None and key in self.cache_data:
             return self.cache_data[key]
         return None
