@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Create a class FIFOCache that inherits from BaseCaching"""
 
-BaseCaching = __import__('base_caching').BaseCaching
+BaseCaching = __import__("base_caching").BaseCaching
 
 
 class FIFOCache(BaseCaching):
     """A caching system using FIFO eviction strategy"""
+
     def __init__(self):
         super().__init__()
 
@@ -13,12 +14,9 @@ class FIFOCache(BaseCaching):
         """Add an item to the cache"""
         if key is not None and item is not None:
             if len(self.cache_data) >= BaseCaching.MAX_ITEMS:
-                # Get the first item inserted (FIFO)
                 first_key = next(iter(self.cache_data))
                 del self.cache_data[first_key]
-                print("DISCARD:", first_key)
-
-            # Add the new item
+                print(f"DISCARD: {first_key}")
             self.cache_data[key] = item
 
     def get(self, key):
