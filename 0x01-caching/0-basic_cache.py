@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Create a class BasicCache that inherits from BaseCaching."""
-from typing import Any, Optional
-
 BaseCaching = __import__("base_caching").BaseCaching
 
 
@@ -12,7 +10,7 @@ class BasicCache(BaseCaching):
         """Initializes the BasicCache instance"""
         super().__init__()
 
-    def put(self, key: Any, item: Any) -> None:
+    def put(self, key, item):
         """Assign to the dictionary self.cache_data"""
         if key is None or item is None:
             return
