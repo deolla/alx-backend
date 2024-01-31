@@ -20,13 +20,12 @@ class LFUCache(BaseCaching):
             return
 
         if len(self.cache_data) >= BaseCaching.MAX_ITEMS:
-            # Find the least frequency used items
             min_frequency = min(self.frequency_counter.values())
             least_frequent_keys = [
-                k for k, v in self.frequency_counter.items() if v == min_frequency
+                k for k, v in self.frequency_counter.items()
+                if v == min_frequency
             ]
 
-            # If there is more than one least frequent item, use LRU tie-breaking
             if len(least_frequent_keys) > 1:
                 least_recently_used_key = min(
                     least_frequent_keys,
