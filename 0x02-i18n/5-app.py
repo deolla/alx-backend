@@ -1,78 +1,58 @@
 #!/usr/bin/env python3
-"""
-A Basic flask application
-"""
-from typing import Dict, Union
+"""Mock logging in with a user."""
+from flask import Flask, render_template, request, g
+from flask_babel import Babel, _
+import pytz
+from pytz import timezone
+from pytz.exceptions import UnknownTimeZoneError
+from typing import Union
 
-from flask import Flask
-from flask import g, request
-from flask import render_template
-from flask_babel import Babel
-
-
-class Config(object):
-    """
-    Application configuration class
-    """
-
-    LANGUAGES = ["en", "fr"]
-    BABEL_DEFAULT_LOCALE = "en"
-    BABEL_DEFAULT_TIMEZONE = "UTC"
-
-
-# Instantiate the application object
 app = Flask(__name__)
-app.config.from_object(Config)
-
-# Wrap the application with Babel
 babel = Babel(app)
 
 
-@babel.localeselector
-def get_locale() -> str:
-    """
-    Gets locale from request object
-    """
-    locale = request.args.get("locale", "").strip()
-    if locale and locale in Config.LANGUAGES:
-        return locale
-    return request.accept_languages.best_match(app.config["LANGUAGES"])
+class Config:
+    """Config for Babel timezone."""
+
+    LANGUAGES = ["en", "fr"]
+    BABEL_DEFAULT_TIMEZONE = "UTC"
+    BABEL_DEFAULT_LOCALE = "en"
 
 
-users = {
-    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
-    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
-    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
-    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
-}
+app.config.from_object(Config)
 
 
-def get_user(id) -> Union[Dict[str, Union[str, None]], None]:
-    """
-    Validate user login details
-    Args:
-        id (str): user id
-    Returns:
-        (Dict): user dictionary if id is valid else None
-    """
-    return users.get(int(id), 0)
+def get_user(login_as: str) -> Union[str, None]:
+    """Get user from mock db."""
+    users = {"user": "User", "admin": "Admin"}
+    return users.get(login_as, None)
 
 
 @app.before_request
 def before_request():
-    """
-    Adds valid user to the global session object `g`
-    """
-    setattr(g, "user", get_user(request.args.get("login_as", 0)))
+    """Set user before request."""
+    g.user = get_user(request.args.get("login_as"))
+    g.locale = get_locale()
 
 
-@app.route("/", strict_slashes=False)
-def index() -> str:
-    """
-    Renders a basic html template
-    """
+def get_locale() -> Union[str, None]:
+    """Get locale for user."""
+    locale = request.args.get("locale")
+    if locale and locale in app.config["LANGUAGES"]:
+        return locale
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
+    # return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+
+@babel.localeselector
+def get_locale_babel() -> str:
+    """Get locale for babel."""
+    if g.user:
+        return g.locale
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
+
+
+@app.route("/", methods=["GET"], strict_slashes=False)
+def welcome() -> str:
+    """Render template."""
     return render_template("5-index.html")
-
-
-if __name__ == "__main__":
-    app.run()
