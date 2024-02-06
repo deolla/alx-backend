@@ -1,32 +1,29 @@
 #!/usr/bin/env python3
-"""Creating a user login system is outside
-the scope of this project."""
+"""A simple flask app
+"""
+
 
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
 
-app = Flask(__name__)
-babel = Babel(app)
-
 
 class Config(object):
-    """Config class for the app in Flask."""
+    """_summary_
+
+    Returns:
+                    _type_: _description_
+    """
 
     LANGUAGES = ["en", "fr"]
     BABEL_DEFAULT_LOCALE = "en"
     BABEL_DEFAULT_TIMEZONE = "UTC"
 
 
+# configure the flask app
+app = Flask(__name__)
 app.config.from_object(Config)
-
-
-@babel.localeselector
-def get_locale():
-    """Get the locale from the request"""
-    locale = request.args.get("locale")
-    if locale and locale in app.config["LANGUAGES"]:
-        return locale
-    return request.accept_languages.best_match(app.config["LANGUAGES"])
+app.url_map.strict_slashes = False
+babel = Babel(app)
 
 
 users = {
@@ -38,15 +35,7 @@ users = {
 
 
 def get_user():
-    """
-    Get user information based on user ID.
-
-    Args:
-        user_id (str): The ID of the user.
-
-    Returns:
-        dict: A dictionary containing user information.
-    """
+    """returns a user dictionary or None if the ID cannot be found"""
     login_id = request.args.get("login_as")
     if login_id:
         return users.get(int(login_id))
@@ -54,25 +43,35 @@ def get_user():
 
 
 @app.before_request
-def before_request():
-    """
-    Execute before all other functions.
-    Set the user information in the Flask global object (g).
-    """
+def before_request() -> None:
+    """_summary_"""
     user = get_user()
     g.user = user
 
 
-@app.route("/")
-def index():
-    """
-    Render the index template.
+@babel.localeselector
+def get_locale():
+    """_summary_
 
     Returns:
-        str: Rendered HTML content.
+                    _type_: _description_
     """
+    locale = request.args.get("locale")
+    if locale in app.config["LANGUAGES"]:
+        print(locale)
+        return locale
+
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
+
+
+# babel.init_app(app, locale_selector=get_locale)
+
+
+@app.route("/")
+def index():
+    """_summary_"""
     return render_template("5-index.html")
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port="5000", host="0.0.0.0", debug=True)
