@@ -51,7 +51,7 @@ def get_user(user_id: int) -> dict:
 
 
 @app.before_request
-def before_request() -> dict:
+def before_request() -> None:
     """
     Execute before all other functions.
     Set the user information in the Flask global object (g).
