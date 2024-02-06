@@ -31,7 +31,7 @@ def get_user(user_id: int) -> dict:
 
 
 @app.before_request
-def before_request():
+def before_request() -> dict:
     """Before request, get user from mock data."""
     user_id = request.args.get("login_as", 0)
     g.user = get_user(user_id) if user_id else None
