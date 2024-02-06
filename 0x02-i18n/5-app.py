@@ -1,58 +1,46 @@
 #!/usr/bin/env python3
-"""Mock logging in with a user."""
+"""A Mock logging in and out of a user."""
 from flask import Flask, render_template, request, g
-from flask_babel import Babel, _
-import pytz
-from pytz import timezone
-from pytz.exceptions import UnknownTimeZoneError
-from typing import Union
+from flask_babel import Babel
 
 app = Flask(__name__)
 babel = Babel(app)
 
 
-class Config:
-    """Config for Babel timezone."""
+class Config(object):
+    """Config class for the app in Flask."""
 
     LANGUAGES = ["en", "fr"]
-    BABEL_DEFAULT_TIMEZONE = "UTC"
     BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
 
 
 app.config.from_object(Config)
 
+users = {
+    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
+    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
+    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
+    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
+}
 
-def get_user(login_as: str) -> Union[str, None]:
-    """Get user from mock db."""
-    users = {"user": "User", "admin": "Admin"}
-    return users.get(login_as, None)
+
+def get_user(user_id: int) -> dict:
+    """Get user from mock data."""
+    return users.get(user_id)
 
 
 @app.before_request
 def before_request():
-    """Set user before request."""
-    g.user = get_user(request.args.get("login_as"))
-    g.locale = get_locale()
+    user_id = int(request.args.get("login_as", 0))
+    g.user = get_user(user_id) if user_id else None
 
 
-def get_locale() -> Union[str, None]:
-    """Get locale for user."""
-    locale = request.args.get("locale")
-    if locale and locale in app.config["LANGUAGES"]:
-        return locale
-    return request.accept_languages.best_match(app.config["LANGUAGES"])
-    # return request.accept_languages.best_match(app.config['LANGUAGES'])
-
-
-@babel.localeselector
-def get_locale_babel() -> str:
-    """Get locale for babel."""
-    if g.user:
-        return g.locale
-    return request.accept_languages.best_match(app.config["LANGUAGES"])
-
-
-@app.route("/", methods=["GET"], strict_slashes=False)
-def welcome() -> str:
-    """Render template."""
+@app.route("/")
+def index():
+    """Index page of the app."""
     return render_template("5-index.html")
+
+
+if __name__ == "__main__":
+    app.run()
