@@ -56,7 +56,7 @@ def before_request():
     Execute before all other functions.
     Set the user information in the Flask global object (g).
     """
-    user = get_user(1)
+    user = get_user(request.args.get("login_as"))
     g.user = user
 
 
