@@ -34,15 +34,15 @@ def get_user(user_id: int) -> dict:
 @babel.localeselector
 def get_locale() -> str:
     """
-    Gets locale from request object
+    Get locale from request and return locale.
     """
-    options = [
+    opts = [
         request.args.get("locale", "").strip(),
         g.user.get("locale", None) if g.user else None,
         request.accept_languages.best_match(app.config["LANGUAGES"]),
         Config.BABEL_DEFAULT_LOCALE,
     ]
-    for locale in options:
+    for locale in opts:
         if locale and locale in Config.LANGUAGES:
             return locale
 
@@ -57,7 +57,7 @@ def before_request():
 @app.route("/")
 def index():
     """Index page of the app."""
-    return render_template("5-index.html")
+    return render_template("6-index.html")
 
 
 if __name__ == "__main__":
