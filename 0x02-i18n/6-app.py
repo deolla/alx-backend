@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Uses user locales to determine the best supported language."""
+"""A Mock logging in and out of a user."""
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
 
@@ -16,11 +16,13 @@ class Config(object):
 
 
 app.config.from_object(Config)
+
+
 users = {
-    1: {"name": "Balou", "locale": "fr"},
-    2: {"name": "Beyonce", "locale": "en"},
-    3: {"name": "Spock", "locale": "kg"},
-    4: {"name": "Teletubby", "locale": None},
+    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
+    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
+    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
+    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
 }
 
 
@@ -29,31 +31,33 @@ def get_user(user_id: int) -> dict:
     return users.get(user_id)
 
 
+@babel.localeselector
+def get_locale() -> str:
+    """
+    Gets locale from request object
+    """
+    options = [
+        request.args.get("locale", "").strip(),
+        g.user.get("locale", None) if g.user else None,
+        request.accept_languages.best_match(app.config["LANGUAGES"]),
+        Config.BABEL_DEFAULT_LOCALE,
+    ]
+    for locale in options:
+        if locale and locale in Config.LANGUAGES:
+            return locale
+
+
 @app.before_request
 def before_request():
-    """Before request."""
-    user_id = request.args.get("login_as")
-    if user_id:
-        user = get_user(int(user_id))
-        if user:
-            from flask import g
-
-            g.user = user
-
-
-@babel.localeselector
-def get_locale():
-    """Get locale for user."""
-    user = getattr(g, "user", None)
-    if user:
-        return user.get("locale")
-    return request.accept_languages.best_match(app.config["LANGUAGES"])
+    """Before each request."""
+    user_id = int(request.args.get("login_as", 0))
+    g.user = get_user(user_id) if user_id else None
 
 
 @app.route("/")
 def index():
     """Index page of the app."""
-    return render_template("6-index.html")
+    return render_template("5-index.html")
 
 
 if __name__ == "__main__":
