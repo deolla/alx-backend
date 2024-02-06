@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""A Mock logging in and out of a user."""
+"""Infer appropriate time zone for user."""
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
+import pytz
 
 app = Flask(__name__)
 babel = Babel(app)
@@ -32,15 +33,41 @@ def get_user(user_id: int) -> dict:
 
 @app.before_request
 def before_request():
-    """Before request, get user from mock data."""
-    user_id = request.args.get("login_as", 0)
-    g.user = get_user(user_id) if user_id else None
+    """Before request."""
+    user_id = request.args.get("login_as")
+    if user_id:
+        user = get_user(int(user_id))
+        if user:
+            from flask import g
+
+            g.user = user
+
+
+@babel.localeselector
+def get_locale():
+    """Get locale for user."""
+    user = getattr(g, "user", None)
+    if user:
+        return user.get("locale")
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
+
+
+@babel.timezoneselector
+def get_timezone():
+    """Get timezone for user."""
+    try:
+        user = getattr(g, "user", None)
+        if user:
+            return pytz.timezone(user.get("timezone"))
+    except pytz.exceptions.UnknownTimeZoneError:
+        pass
+    return pytz.timezone(app.config["BABEL_DEFAULT_TIMEZONE"])
 
 
 @app.route("/")
 def index():
     """Index page of the app."""
-    return render_template("5-index.html")
+    return render_template("7-index.html")
 
 
 if __name__ == "__main__":
