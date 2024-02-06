@@ -37,17 +37,17 @@ users = {
 }
 
 
-def get_user(user_id: int) -> dict:
+def get_user(user_id: str) -> dict:
     """
     Get user information based on user ID.
 
     Args:
-        user_id (int): The ID of the user.
+        user_id (str): The ID of the user.
 
     Returns:
         dict: A dictionary containing user information.
     """
-    return users.get(user_id, {})
+    return users.get(int(user_id), 0)
 
 
 @app.before_request
