@@ -47,7 +47,7 @@ def get_user(user_id: int) -> dict:
     Returns:
         dict: A dictionary containing user information.
     """
-    return users.get(user_id)
+    return users.get(user_id) if user_id else None
 
 
 @app.before_request
