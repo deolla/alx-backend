@@ -61,7 +61,7 @@ def before_request():
 
 
 @app.route("/")
-def index() -> str:
+def index():
     """
     Render the index template.
 
