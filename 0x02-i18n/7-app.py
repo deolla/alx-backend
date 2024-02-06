@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Infer appropriate time zone for user."""
+"""A Mock logging in a"""
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
 import pytz
@@ -18,6 +18,7 @@ class Config(object):
 
 app.config.from_object(Config)
 
+
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
     2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
@@ -31,43 +32,47 @@ def get_user(user_id: int) -> dict:
     return users.get(user_id)
 
 
-@app.before_request
-def before_request():
-    """Before request."""
-    user_id = request.args.get("login_as")
-    if user_id:
-        user = get_user(int(user_id))
-        if user:
-            from flask import g
-
-            g.user = user
-
-
 @babel.localeselector
-def get_locale():
-    """Get locale for user."""
-    user = getattr(g, "user", None)
-    if user:
-        return user.get("locale")
-    return request.accept_languages.best_match(app.config["LANGUAGES"])
+def get_locale() -> str:
+    """
+    Get locale from request and return locale.
+    """
+    opts = [
+        request.args.get("locale", "").strip(),
+        g.user.get("locale", None) if g.user else None,
+        request.accept_languages.best_match(app.config["LANGUAGES"]),
+        Config.BABEL_DEFAULT_LOCALE,
+    ]
+    for locale in opts:
+        if locale and locale in Config.LANGUAGES:
+            return locale
 
 
 @babel.timezoneselector
-def get_timezone():
-    """Get timezone for user."""
+def get_timezone() -> str:
+    """
+    Get timezone from request and return timezone.
+    """
+    timee = request.args.get("timezone", "").strip()
+    if not timee and g.user:
+        timee = g.user["timezone"]
     try:
-        user = getattr(g, "user", None)
-        if user:
-            return pytz.timezone(user.get("timezone"))
+        return pytz.timezone(timee).zone
     except pytz.exceptions.UnknownTimeZoneError:
-        pass
-    return pytz.timezone(app.config["BABEL_DEFAULT_TIMEZONE"])
+        return app.config["BABEL_DEFAULT_TIMEZONE"]
+
+
+@app.before_request
+def before_request():
+    """Before each request."""
+    user_id = int(request.args.get("login_as", 0))
+    g.user = get_user(user_id) if user_id else None
 
 
 @app.route("/")
 def index():
     """Index page of the app."""
-    return render_template("7-index.html")
+    return render_template("6-index.html")
 
 
 if __name__ == "__main__":
