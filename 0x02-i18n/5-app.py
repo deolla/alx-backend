@@ -17,6 +17,16 @@ class Config(object):
 
 app.config.from_object(Config)
 
+
+@babel.localeselector
+def get_locale():
+    """Get the locale from the request"""
+    locale = request.args.get("locale")
+    if locale and locale in app.config["LANGUAGES"]:
+        return locale
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
+
+
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
     2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
