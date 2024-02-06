@@ -47,7 +47,7 @@ def get_user(user_id: int) -> dict:
     Returns:
         dict: A dictionary containing user information.
     """
-    return users.get(user_id) if user_id else None
+    return users.get(user_id, {})
 
 
 @app.before_request
@@ -56,7 +56,7 @@ def before_request() -> None:
     Execute before all other functions.
     Set the user information in the Flask global object (g).
     """
-    user_id = request.args.get("login_as", 0)
+    user_id = int(request.args.get("login_as", 0))
     g.user = get_user(user_id)
 
 
