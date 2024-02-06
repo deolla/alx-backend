@@ -9,7 +9,7 @@ app = Flask(__name__)
 def index():
     """Index page"""
     return render_template(
-        "0-index.html", title="Welcome to Holberton", h1="Hello World"
+        "0-index.html", title="Welcome to Holberton", header="Hello World"
     )
 
 
