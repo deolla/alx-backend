@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""A Mock logging in and out of a user."""
+"""Creating a user login system is outside
+the scope of this project."""
+
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
 
@@ -17,6 +19,16 @@ class Config(object):
 
 app.config.from_object(Config)
 
+
+@babel.localeselector
+def get_locale():
+    """Get the locale from the request"""
+    locale = request.args.get("locale")
+    if locale and locale in app.config["LANGUAGES"]:
+        return locale
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
+
+
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
     2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
@@ -26,20 +38,36 @@ users = {
 
 
 def get_user(user_id: int) -> dict:
-    """Get user from mock data."""
+    """
+    Get user information based on user ID.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        dict: A dictionary containing user information.
+    """
     return users.get(user_id)
 
 
 @app.before_request
-def before_request() -> dict:
-    """Before request, get user from mock data."""
-    user_id = request.args.get("login_as", 0)
-    g.user = get_user(user_id) if user_id else None
+def before_request():
+    """
+    Execute before all other functions.
+    Set the user information in the Flask global object (g).
+    """
+    user_id = int(request.args.get("login_as", 0))
+    g.user = get_user(user_id)
 
 
 @app.route("/")
-def index():
-    """Index page of the app."""
+def index() -> str:
+    """
+    Render the index template.
+
+    Returns:
+        str: Rendered HTML content.
+    """
     return render_template("5-index.html")
 
 
