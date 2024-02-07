@@ -27,11 +27,7 @@ def get_locale():
     Returns:
         str: The best-matching language based on user preferences or default locale.
     """
-    # Use request.accept_languages to determine the best match with supported languages
-    return (
-        request.accept_languages.best_match(app.config["LANGUAGES"])
-        or app.config["BABEL_DEFAULT_LOCALE"]
-    )
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
 
 
 @app.route("/")
