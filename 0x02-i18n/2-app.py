@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
-"""A simple flask app
+"""Create a get_locale function with
+the babel.localeselector decorator.
 """
-
-
 from flask import Flask, render_template, request
 from flask_babel import Babel
 
+# configure the flask app
+app = Flask(__name__)
+babel = Babel(app)
+
 
 class Config(object):
-    """_summary_
+    """
+    Create a Config object
+
+    Args:
+        object (object): object
 
     Returns:
-            _type_: _description_
+        object: object
     """
 
     LANGUAGES = ["en", "fr"]
@@ -19,27 +26,30 @@ class Config(object):
     BABEL_DEFAULT_TIMEZONE = "UTC"
 
 
-# configure the flask app
-app = Flask(__name__)
 app.config.from_object(Config)
-babel = Babel(app)
 
 
 @babel.localeselector
 def get_locale():
-    """_summary_
+    """
+    get locale from request
 
     Returns:
-            _type_: _description_
+        str: best match language
     """
     return request.accept_languages.best_match(app.config["LANGUAGES"])
 
 
 @app.route("/")
 def index():
-    """_summary_"""
+    """
+    Render a template
+
+    Returns:
+        str: render template
+    """
     return render_template("2-index.html")
 
 
 if __name__ == "__main__":
-    app.run(port="5000", host="0.0.0.0", debug=True)
+    app.run()
