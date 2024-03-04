@@ -1,3 +1,7 @@
+// Write a script named 0-redis_client.js that
+// will display the school value for Holberton and its dependencies.
+
+
 import redis from 'redis';
 
 const client = redis.createClient();
@@ -11,16 +15,16 @@ client.on('error', (err) => {
 });
 
 const setNewSchool = (schoolName, value) => {
-    client.set(schoolName, value, (err, reply) => {
-        redis.print(`Reply: ${reply}`);
-    });
-}
+  client.set(schoolName, value, (err, reply) => {
+    console.log(`Reply: ${reply}`);
+  });
+};
 
 const displaySchoolValue = (schoolName) => {
-    client.get(schoolName, (err, reply) => {
-        console.log(reply);
-    });
-}
+  client.get(schoolName, (err, reply) => {
+    console.log(reply);
+  });
+};
 
 displaySchoolValue('Holberton');
 setNewSchool('HolbertonSanFrancisco', '100');
